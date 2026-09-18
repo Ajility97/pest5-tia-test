@@ -2,6 +2,9 @@ name: TIA PR
 
 on:
   pull_request:
+  push:
+    branches:
+      - experiment/tia-pr
 
 jobs:
   tests:
@@ -26,9 +29,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .pest/tia
-          key: pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          key: pest-tia-${{ runner.os }}-tia-pr-${{ github.sha }}
           restore-keys: |
-            pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-
+            pest-tia-${{ runner.os }}-tia-pr-
 
       - name: Run tests with TIA
         run: ./vendor/bin/pest --tia --coverage
@@ -45,7 +48,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .pest/tia
-          key: pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          key: pest-tia-${{ runner.os }}-tia-pr-${{ github.sha }}
 
       - name: Upload TIA state
         if: always()
