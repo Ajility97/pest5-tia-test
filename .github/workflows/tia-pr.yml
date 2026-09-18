@@ -34,7 +34,7 @@ jobs:
             pest-tia-${{ runner.os }}-tia-pr-
 
       - name: Run tests with TIA
-        run: ./vendor/bin/pest --tia --coverage
+        run: ./vendor/bin/pest --tia
 
       - name: Show TIA storage
         if: always()
