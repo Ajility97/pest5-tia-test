@@ -1,0 +1,58 @@
+name: TIA PR
+
+on:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Restore TIA cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .pest/tia
+          key: pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-
+
+      - name: Run tests with TIA
+        run: ./vendor/bin/pest --tia --coverage
+
+      - name: Show TIA storage
+        if: always()
+        run: |
+          path="$(./vendor/bin/pest --baseline)"
+          echo "TIA path: ${path}"
+          ls -la "${path}" || true
+
+      - name: Save TIA cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .pest/tia
+          key: pest-tia-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+
+      - name: Upload TIA state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pest-tia-state
+          path: .pest/tia
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
